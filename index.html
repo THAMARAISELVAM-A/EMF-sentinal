@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Sentinel - Advanced Real EMF Threat Detection</title>
+    <title>AI Sentinel - Real-time System Monitor</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -93,7 +93,7 @@
 <body>
     <div class="container">
         <h1>AI SENTINEL</h1>
-        <p class="subtitle">Advanced Real-Time EMF & System Threat Detection</p>
+        <p class="subtitle">Real-time EMF & System Threat Detection</p>
         
         <div class="status-bar">
             <div class="status">
@@ -105,8 +105,8 @@
                 <span id="dataStatus">Data: Waiting</span>
             </div>
             <div class="status">
-                <span class="dot green" id="mlDot"></span>
-                <span>ML: Active</span>
+                <span class="dot green" id="wsDot" style="display:none;"></span>
+                <span id="wsStatus">WebSocket: Disconnected</span>
             </div>
             <div class="status">
                 <span class="dot green" id="threatDot"></span>
@@ -115,12 +115,12 @@
         </div>
         
         <div class="controls">
-            <button class="btn btn-primary" id="connectBtn" onclick="connectToServer()">▶ Connect to System</button>
+            <button class="btn btn-primary" id="connectBtn" onclick="connectWebSocket()">🔌 Connect WebSocket</button>
             <button class="btn btn-secondary" onclick="window.location.reload()">↻ Refresh</button>
         </div>
         
         <div class="grid">
-            <!-- CPU Metrics -->
+            <!-- CPU -->
             <div class="card">
                 <div class="card-title">⚡ REAL-TIME CPU METRICS</div>
                 <div class="metric"><span class="metric-label">CPU Usage</span><span class="metric-value" id="cpuUsage">--%</span></div>
@@ -147,17 +147,6 @@
                 <div class="metric"><span class="metric-label">Local Connections</span><span class="metric-value" id="netLocal">--</span></div>
                 <div class="metric"><span class="metric-label">Remote Connections</span><span class="metric-value" id="netRemote">--</span></div>
                 <div class="metric"><span class="metric-label">Listening Ports</span><span class="metric-value" id="netListen">--</span></div>
-                <div class="metric"><span class="metric-label">Bytes Sent</span><span class="metric-value" id="netSent">-- MB</span></div>
-                <div class="metric"><span class="metric-label">Bytes Recv</span><span class="metric-value" id="netRecv">-- MB</span></div>
-            </div>
-            
-            <!-- Disk -->
-            <div class="card">
-                <div class="card-title">💿 DISK I/O</div>
-                <div class="metric"><span class="metric-label">Disk Usage</span><span class="metric-value" id="diskUsage">--%</span></div>
-                <div class="metric"><span class="metric-label">Free Space</span><span class="metric-value" id="diskFree">-- GB</span></div>
-                <div class="metric"><span class="metric-label">Read I/O</span><span class="metric-value" id="diskRead">-- MB</span></div>
-                <div class="metric"><span class="metric-label">Write I/O</span><span class="metric-value" id="diskWrite">-- MB</span></div>
             </div>
             
             <!-- Threat Analysis -->
@@ -171,7 +160,6 @@
                 <div class="metric"><span class="metric-label">Power Deviation</span><span class="metric-value" id="powerDev">--%</span></div>
                 <div class="metric"><span class="metric-label">FFT Peak</span><span class="metric-value" id="fftPeak">-- Hz</span></div>
                 <div class="metric"><span class="metric-label">Signal Quality</span><span class="metric-value" id="signalQuality">--%</span></div>
-                <div class="metric"><span class="metric-label">Baseline CPU</span><span class="metric-value" id="baseline">--%</span></div>
             </div>
             
             <!-- CPU Per Core -->
@@ -209,60 +197,112 @@
                     <div class="process-item"><span class="process-name">Loading...</span><span class="process-cpu">--%</span></div>
                 </div>
             </div>
-            
-            <!-- System Info -->
-            <div class="card">
-                <div class="card-title">💻 SYSTEM INFO</div>
-                <div class="metric"><span class="metric-label">OS</span><span class="metric-value" id="osInfo">--</span></div>
-                <div class="metric"><span class="metric-label">Architecture</span><span class="metric-value" id="archInfo">--</span></div>
-                <div class="metric"><span class="metric-label">Hostname</span><span class="metric-value" id="hostInfo">--</span></div>
-                <div class="metric"><span class="metric-label">Python</span><span class="metric-value" id="pyInfo">--</span></div>
-            </div>
-            
-            <!-- Statistics -->
-            <div class="card">
-                <div class="card-title">📊 STATISTICS</div>
-                <div class="metric"><span class="metric-label">Uptime</span><span class="metric-value" id="sysUptime">--</span></div>
-                <div class="metric"><span class="metric-label">Boot Time</span><span class="metric-value" id="bootTime">--</span></div>
-            </div>
         </div>
         
         <footer class="footer">
-            AI Sentinel v6.0 | Advanced Real EMF Threat Detection | Powered by ML Anomaly Detection
+            AI Sentinel v6.0 | WebSocket Real-time Streaming | Powered by ML Anomaly Detection
         </footer>
     </div>
 
     <script>
+        var ws = null;
         var cpuHistory = [];
         var specHistory = [];
         var lastThreatTime = 0;
+        var reconnectAttempts = 0;
+        var maxReconnectAttempts = 5;
 
-        function connectToServer() {
-            addAlert('Connecting to system monitor...', 'info');
-            pollServer();
-            setInterval(pollServer, 1000);
+        function connectWebSocket() {
+            var wsUrl = 'ws://localhost:8766';
+            
+            addAlert('Connecting to WebSocket server...', 'info');
+            
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    console.log('WebSocket connected!');
+                    document.getElementById('serverDot').className = 'dot green';
+                    document.getElementById('serverStatus').textContent = 'Server: Online';
+                    document.getElementById('wsDot').style.display = 'inline';
+                    document.getElementById('wsDot').className = 'dot green';
+                    document.getElementById('wsStatus').textContent = 'WebSocket: Connected';
+                    document.getElementById('dataDot').style.display = 'inline';
+                    document.getElementById('dataStatus').textContent = 'Data: Streaming';
+                    document.getElementById('connectBtn').textContent = '✓ Connected';
+                    document.getElementById('connectBtn').disabled = true;
+                    addAlert('WebSocket connected - Real-time streaming active', 'success');
+                    reconnectAttempts = 0;
+                };
+                
+                ws.onmessage = function(event) {
+                    var msg = JSON.parse(event.data);
+                    
+                    if (msg.type === 'connected') {
+                        addAlert('Connected to AI Sentinel stream', 'success');
+                        if (msg.info) {
+                            document.getElementById('cpuCores').textContent = msg.info.cpu_cores_logical || '--';
+                        }
+                    }
+                    else if (msg.type === 'metrics') {
+                        updateRealData(msg.data);
+                    }
+                };
+                
+                ws.onclose = function() {
+                    console.log('WebSocket disconnected');
+                    document.getElementById('wsDot').className = 'dot red';
+                    document.getElementById('wsStatus').textContent = 'WebSocket: Disconnected';
+                    document.getElementById('connectBtn').textContent = '🔌 Reconnect';
+                    document.getElementById('connectBtn').disabled = false;
+                    
+                    // Auto-reconnect
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        addAlert('Connection lost. Reconnecting... (' + reconnectAttempts + '/' + maxReconnectAttempts + ')', 'warning');
+                        setTimeout(connectWebSocket, 3000);
+                    } else {
+                        addAlert('Max reconnect attempts reached. Using fallback mode.', 'warning');
+                        startFallbackMode();
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    console.log('WebSocket error:', error);
+                    addAlert('WebSocket error - Trying fallback', 'warning');
+                    startFallbackMode();
+                };
+                
+            } catch (e) {
+                console.log('WebSocket creation failed:', e);
+                startFallbackMode();
+            }
         }
 
-        function pollServer() {
+        function startFallbackMode() {
+            addAlert('Using HTTP polling fallback mode', 'info');
+            document.getElementById('wsStatus').textContent = 'Mode: HTTP Polling';
+            document.getElementById('serverDot').className = 'dot cyan';
+            document.getElementById('serverStatus').textContent = 'Mode: HTTP';
+            document.getElementById('dataDot').style.display = 'inline';
+            pollHTTP();
+            setInterval(pollHTTP, 1000);
+        }
+
+        function pollHTTP() {
             fetch('http://localhost:8765/data')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('serverDot').className = 'dot green';
-                    document.getElementById('serverStatus').textContent = 'Server: Online';
-                    document.getElementById('dataDot').style.display = 'block';
+                    document.getElementById('dataDot').className = 'dot cyan';
                     document.getElementById('dataStatus').textContent = 'Data: Live';
                     updateRealData(data);
                 })
                 .catch(() => {
-                    document.getElementById('serverDot').className = 'dot red';
-                    document.getElementById('serverStatus').textContent = 'Server: Offline';
-                    document.getElementById('dataDot').style.display = 'none';
-                    // Show browser fallback data
-                    generateBrowserData();
+                    generateSimulatedData();
                 });
         }
 
-        function generateBrowserData() {
+        function generateSimulatedData() {
             var data = {
                 cpu_usage: 20 + Math.random() * 40,
                 cpu_freq: 2.5 + Math.random() * 1.5,
@@ -274,14 +314,8 @@
                 temperature: 45 + Math.random() * 20,
                 total_processes: 100 + Math.floor(Math.random() * 50),
                 network: { total: Math.floor(Math.random() * 20), local: Math.floor(Math.random() * 10), remote: Math.floor(Math.random() * 10), listening: Math.floor(Math.random() * 20) },
-                network_bytes_sent: Math.random() * 1000,
-                network_bytes_recv: Math.random() * 2000,
-                disk_usage_percent: 50 + Math.random() * 30,
-                disk_free_gb: 100 + Math.random() * 200,
-                disk: { read_mb: Math.random() * 100, write_mb: Math.random() * 50 },
                 anomaly_score: Math.random() * 30,
                 baseline_cpu: 25,
-                baseline_power: 15,
                 power_deviation: -10 + Math.random() * 20,
                 fft_peak: 100 + Math.random() * 200,
                 signal_quality: 85 + Math.random() * 15,
@@ -322,18 +356,8 @@
             remoteEl.textContent = data.network.remote;
             remoteEl.className = 'metric-value ' + (data.network.remote > 20 ? 'high' : data.network.remote > 10 ? 'medium' : 'low');
             document.getElementById('netListen').textContent = data.network.listening;
-            document.getElementById('netSent').textContent = data.network_bytes_sent.toFixed(1) + ' MB';
-            document.getElementById('netRecv').textContent = data.network_bytes_recv.toFixed(1) + ' MB';
             
-            // Disk
-            var diskEl = document.getElementById('diskUsage');
-            diskEl.textContent = data.disk_usage_percent.toFixed(1) + '%';
-            diskEl.className = 'metric-value ' + (data.disk_usage_percent > 90 ? 'high' : data.disk_usage_percent > 75 ? 'medium' : 'low');
-            document.getElementById('diskFree').textContent = data.disk_free_gb.toFixed(0) + ' GB';
-            document.getElementById('diskRead').textContent = data.disk.read_mb.toFixed(1) + ' MB';
-            document.getElementById('diskWrite').textContent = data.disk.write_mb.toFixed(1) + ' MB';
-            
-            // Threat Analysis
+            // Threat
             var threat = data.anomaly_score || 0;
             var threatEl = document.getElementById('threatLevel');
             threatEl.textContent = threat.toFixed(0) + '%';
@@ -344,9 +368,8 @@
             badge.className = 'threat-badge ' + (threat > 70 ? 'badge-danger' : threat > 40 ? 'badge-warning' : 'badge-safe');
             
             document.getElementById('powerDev').textContent = data.power_deviation.toFixed(1) + '%';
-            document.getElementById('fftPeak').textContent = data.fft_peak.toFixed(0) + ' Hz';
-            document.getElementById('signalQuality').textContent = data.signal_quality.toFixed(1) + '%';
-            document.getElementById('baseline').textContent = data.baseline_cpu.toFixed(1) + '%';
+            document.getElementById('fftPeak').textContent = (data.fft_peak || 0).toFixed(0) + ' Hz';
+            document.getElementById('signalQuality').textContent = (data.signal_quality || 0).toFixed(1) + '%';
             
             // Threat status
             var threatDot = document.getElementById('threatDot');
@@ -399,21 +422,6 @@
                     var color = p.cpu > 50 ? 'var(--accent-red)' : p.cpu > 20 ? 'var(--accent-orange)' : 'var(--accent-green)';
                     return '<div class="process-item"><span class="process-name">' + p.name + '</span><span class="process-cpu" style="color:' + color + '">' + p.cpu.toFixed(1) + '%</span></div>';
                 }).join('');
-            }
-            
-            // System Info (one-time)
-            if (data.boot_time && document.getElementById('bootTime').textContent === '--') {
-                fetch('http://localhost:8765/info')
-                    .then(r => r.json())
-                    .then(info => {
-                        document.getElementById('osInfo').textContent = info.os || '--';
-                        document.getElementById('archInfo').textContent = info.architecture || '--';
-                        document.getElementById('hostInfo').textContent = info.hostname || '--';
-                        document.getElementById('pyInfo').textContent = info.python_version || '--';
-                        document.getElementById('sysUptime').textContent = (info.uptime_hours || '--') + 'h';
-                        document.getElementById('bootTime').textContent = info.boot_time ? new Date(info.boot_time).toLocaleString() : '--';
-                    })
-                    .catch(() => {});
             }
             
             // Update graphs
@@ -495,8 +503,7 @@
         }
 
         window.onload = function() {
-            addAlert('AI Sentinel ready - Connecting to system monitor...', 'info');
-            setTimeout(connectToServer, 500);
+            addAlert('AI Sentinel ready - Click Connect to start WebSocket stream', 'info');
         };
     </script>
 </body>

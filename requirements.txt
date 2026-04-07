@@ -1,5 +1,6 @@
-# AI Sentinel - Real EMF Threat Detection
+# AI Sentinel - Requirements
 # Install: pip install -r requirements.txt
 
 psutil>=5.9.0
 numpy>=1.24.0
+websockets>=10.0

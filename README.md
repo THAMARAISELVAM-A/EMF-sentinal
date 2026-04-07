@@ -1,167 +1,108 @@
-# 🛡️ AI Sentinel - EMF Attacker Locator
+# 🛡️ AI Sentinel - Real EMF Threat Detection
 
-![Version](https://img.shields.io/badge/version-5.0.0-blue)
+![Version](https://img.shields.io/badge/version-6.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Platform](https://img.shields.io/badge/platform-Web%20%7C%20Python-red)
-![Stars](https://img.shields.io/github/stars/yourusername/ai-sentinel?style=social)
+![Python](https://img.shields.io/badge/python-3.8+-blue)
 
-> **Real-Time EMF-Based Threat Detection & Attack Source Location System**
+> **Real-Time EMF-Based Threat Detection System**
+> Uses electromagnetic side-channel analysis to detect anomalies in CPU power consumption
 
-AI Sentinel uses Electromagnetic Side-Channel Analysis (EM-SCA) combined with machine learning to detect malware and pinpoint the geographic origin of cyber attacks through reverse signal tracking.
+## 🚀 Features
 
-## 🎯 Features
+### Real System Monitoring
+- **CPU Usage** - Real-time CPU percentage monitoring
+- **CPU Power Estimation** - Estimates power draw based on CPU load
+- **Memory Usage** - System memory consumption tracking
+- **Temperature** - CPU temperature monitoring (when available)
+- **Process List** - Top CPU-consuming processes
 
-### Core Capabilities
-- **EMF Power Analysis** - Real-time CPU power monitoring using Intel RAPL
-- **FFT Spectrogram** - Time-frequency signal analysis
-- **ML Anomaly Detection** - Neural network-based threat classification
-- **Reverse Tracking** - Triangulation to locate attack source
-- **Direction Finding** - DOA (Direction of Arrival) analysis
+### EMF Analysis
+- **Baseline Calibration** - Establishes normal EMF signature
+- **Power Variance Detection** - Detects abnormal power consumption
+- **FFT Analysis** - Frequency domain analysis
+- **Threat Scoring** - ML-based anomaly scoring
 
-### Live Intelligence Database
-- **9 Attack Signatures** with real-world malware profiles
-- **Geographic Mapping** - World map with threat locations
-- **IOC Tracking** - Indicators of Compromise for each threat
-- **Live Feed** - Real-time event streaming
+### Real-Time Visualization
+- **CPU Waveform** - Live CPU usage graph
+- **Spectrogram** - Time-frequency visualization
+- **Threat Gauge** - Anomaly score display
+- **Alert System** - Real-time threat alerts
 
-### Visualizations
-- Interactive World Map
-- Real-time FFT Waveform
-- FFT Spectrogram
-- Direction Finder Compass
-- ML Neural Network Visualization
-- 4-Channel Sensor Array
+## 📦 Installation
 
-## 🚀 Quick Start
-
-### Web Version (No Installation)
-Simply open `frontend/index.html` in any modern browser.
-
-### With Local Server
+### 1. Install Dependencies
 ```bash
-cd frontend
-npx serve
-# Open http://localhost:3000
+pip install -r requirements.txt
 ```
 
-### Full System (Backend + Frontend)
+### 2. Start Backend Server
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Start backend
 cd backend
 python sensor.py
-
-# Open frontend in browser
-cd ../frontend
-npx serve
 ```
+
+### 3. Open Frontend
+Open `index.html` in your browser, or use a local server:
+```bash
+npx serve .
+```
+
+## 🎯 How It Works
+
+### EMF Side-Channel Analysis
+Every CPU operation draws electrical power, creating electromagnetic emissions. This system monitors:
+
+1. **Baseline Power** - Normal idle power consumption (~10-20W)
+2. **Active Power** - Power under current workload
+3. **Variance** - Deviation from baseline indicates anomalies
+
+### Threat Detection Logic
+```
+IF power_variance > 50%: THREAT = HIGH
+IF cpu_usage > 80%: THREAT = ELEVATED  
+IF abnormal_patterns: THREAT = CRITICAL
+```
+
+## 📊 API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /data` | Real-time CPU/EMF metrics |
+| `GET /info` | System information |
+| `GET /health` | Health check |
+
+## 🔧 Usage
+
+1. **Start Backend**: `python backend/sensor.py`
+2. **Open Frontend**: Click "Connect to Backend"
+3. **Monitor**: Watch real-time EMF signatures
+4. **Test**: Click "Test High Load" to stress test
 
 ## 📁 Project Structure
 
 ```
 ai-sentinel/
-├── frontend/
-│   ├── index.html        # Main dashboard
-│   ├── package.json      # NPM config
-│   └── README.md         # Frontend docs
+├── index.html          # Frontend dashboard
 ├── backend/
-│   ├── sensor.py         # Power monitoring + ML
-│   └── requirements.txt  # Python deps
-├── .github/
-│   └── workflows/
-│       └── deploy.yml    # CI/CD pipeline
-├── LICENSE
-├── README.md
-└── .gitignore
+│   └── sensor.py       # Python backend (real monitoring)
+├── requirements.txt    # Python dependencies
+└── README.md          # This file
 ```
 
-## 🔬 How It Works
+## ⚠️ Limitations
 
-### EMF Power Analysis
-Different malware creates unique electromagnetic signatures:
+- **No physical EMF sensor** - Uses CPU power estimation instead
+- **Browser limitations** - WebSocket may require HTTP fallback
+- **Windows/Linux only** - Backend uses psutil
 
-| Threat Type | Power Signature | Pattern |
-|-------------|----------------|---------|
-| Ransomware | 85W chaotic spikes | Encryption bursts |
-| Cryptominer | 55W sustained | Hash computation |
-| DDoS Botnet | 45W periodic | Network bursts |
-| Trojan | 38W irregular | Stealth operation |
-| Spyware | 18W micro-pulses | Keystroke capture |
+## 📝 Requirements
 
-### Reverse Tracking Algorithm
-```
-1. 4-point sensor array detects EMF emissions
-2. Calculate bearing from signal strength differences
-3. Triangulate position using 3-point intersection
-4. Estimate distance from signal attenuation
-5. Generate GPS coordinates of threat source
-```
-
-## 🎨 Threat Database
-
-### Live Attack Signatures
-
-| # | Threat | Power | Location | Malware | IOC |
-|---|--------|-------|----------|---------|-----|
-| 1 | Ransomware | 85W | New York, USA | LockBit 3.0 | C2: 192.168.1.100 |
-| 2 | Cryptominer | 55W | London, UK | XMRig | Wallet: 45abc... |
-| 3 | DDoS | 45W | Tokyo, Japan | Mirai | Bots: 10,000+ |
-| 4 | Trojan | 38W | Moscow, Russia | Emotet | Hash: abc123... |
-| 5 | Spyware | 18W | Shanghai, China | Predator | Target: Mobile |
-| 6 | WiFi Attack | 25W | Sydney, AU | WiFi Deauth | Channel: 6 |
-| 7 | Bluetooth | 12W | Paris, France | BlueBorne | BD_ADDR: AA:BB:CC |
-| 8 | DoS Attack | 65W | Berlin, Germany | LOIC | 50Gbps |
-| 9 | Normal | 15W | Local | None | N/A |
-
-## 🛠️ Technology Stack
-
-### Frontend
-- HTML5 / CSS3 / JavaScript
-- Canvas API for visualizations
-- Web Audio API for FFT
-- WebSocket for real-time data
-
-### Backend
 - Python 3.8+
-- WebSockets (aiodopple)
-- NumPy for signal processing
-- Intel RAPL / pyJoules for power data
-
-### Infrastructure
-- GitHub Actions for CI/CD
-- GitHub Pages for hosting
-- MIT License
-
-## 📊 Research Background
-
-This project is based on real academic research:
-
-- **MAD-EN** - Microarchitectural Attack Detection using Energy
-- **EM-SCA** - Electromagnetic Side-Channel Analysis
-- **Intel PCM** - Performance Counter Monitor
-- **ChipWhisperer** - Side-channel analysis tools
-
-## 🔒 Security Applications
-
-- SOC/SIEM Integration
-- EDR Enhancement
-- ICS/SCADA Protection
-- Cloud Security
-- IoT Security
-
-## 📝 Usage
-
-1. Open the application in your browser
-2. Click **"Connect to Live Feed"**
-3. Click threat buttons to simulate attacks
-4. Watch real-time detection and location tracking
-5. Enable sound for audio alerts
+- psutil
+- numpy
+- Modern web browser
 
 ## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines first.
 
 1. Fork the repository
 2. Create your feature branch
@@ -171,20 +112,8 @@ Contributions are welcome! Please read our contributing guidelines first.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**AI Sentinel Team**
-- GitHub: [@yourusername](https://github.com/yourusername)
-
-## ⭐ Show Your Support
-
-Give a ⭐ if this project helped you!
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 
 **Made with ❤️ for cybersecurity research**
-
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/ai-sentinel?style=social)](https://github.com/yourusername/ai-sentinel/stargazers)
-[![Twitter](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fai-sentinel)](https://twitter.com/intent/tweet?text=Check%20out%20this%20amazing%20EMF%20Attacker%20Locator%21&url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fai-sentinel)

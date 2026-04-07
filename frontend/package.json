@@ -1,0 +1,36 @@
+{
+  "name": "ai-sentinel-frontend",
+  "version": "5.0.0",
+  "description": "AI Sentinel - EMF Attacker Locator | Real-Time Threat Intelligence",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 3000",
+    "dev": "npx live-server --port=3000",
+    "build": "echo 'Build complete - static files ready'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "cybersecurity",
+    "emf",
+    "malware-detection",
+    "side-channel",
+    "threat-intelligence",
+    "machine-learning",
+    "fft",
+    "real-time-monitoring"
+  ],
+  "author": "AI Sentinel",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ai-sentinel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/ai-sentinel/issues"
+  },
+  "homepage": "https://github.com/yourusername/ai-sentinel#readme"
+}
